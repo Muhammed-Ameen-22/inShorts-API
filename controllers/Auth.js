@@ -68,7 +68,7 @@ export const login =async(req,res)=>{
         //checking password entered is same or not
         
         const validPassword= await bcrypt.compare(password,user.password)
-        console.log('valid pass',validPassword)
+        console.log('valid password',validPassword)
 
         if(!validPassword)
         {

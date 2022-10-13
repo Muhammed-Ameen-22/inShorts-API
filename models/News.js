@@ -3,11 +3,10 @@ const Schema=mongoose.Schema;
 
 const NewsSchema= new Schema({
     
-    Image:{
+    image:{
         type: String,
         min: 3,
         max: 40,
-        unique:true
       },
       title:{
         type: String,
@@ -15,19 +14,19 @@ const NewsSchema= new Schema({
         max: 20,
     
       },
-      subtitle:{
+      subTitle:{
         type: String,
         min: 6,
         max: 50,
     
       },
-      author_name:{
+      authorName:{
         type: String,
         min: 6,
         max: 20,
     
       },
-      published_date:{
+      publishedDate:{
         type: Date,
     
       },
