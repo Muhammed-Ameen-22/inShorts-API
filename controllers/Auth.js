@@ -2,110 +2,94 @@ import User from "../models/User.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-export const register =async(req,res)=>{
-    const userName=req.body.userName;
-    const password=req.body.password;
+export const register = async (req, res) => {
+    const userName = req.body.userName;
+    const password = req.body.password;
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    console.log('reached register')
     try {
-        
-       
-        console.log('req.body',req.body)
 
         //check if username already exists in db
 
-        User.findOne({ userName : userName }, function (data,err) {
-            if (err) 
-            {
-                
+        User.findOne({ userName: userName }, function (data, err) {
+            if (err) {
                 //user exists
                 const response = { "Status": "Failure", "Reason": "Username already exist" }
                 return res.status(400).send(response)
-
             }
 
-            else{
-
+            else {
 
                 //adding user
-                const user = new User({ userName: userName, password:hashedPassword });
+                const user = new User({ userName: userName, password: hashedPassword });
                 user.save();
                 console.log('Registered successfully')
-                return res.status(200).send('Successful')
+                return res.status(200).send('Successfull registration')
 
             }
 
         }
         )
-        }catch (error) {
-             
+    } catch (error) {
+        console.log(error)
     }
 }
 
 
-export const login =async(req,res)=>{
-    const userName=req.body.userName;
-    const password=req.body.password;
-    console.log('reached login')
+export const login = async (req, res) => {
+    const userName = req.body.userName;
+    const password = req.body.password;
+
     try {
-        
-       
-        console.log('req.body',req.body)
 
         //checking whether user exist
+        const user = await User.findOne({ userName: userName });
 
-        const user=await User.findOne({ userName : userName });
-
-        
-        
-        if(!user)
-        {
-            console.log('!user')
+        if (!user) {
+            //user does not exist
+    
             const response = { "Status": "Failure", "Reason": "User does not exist" }
             return res.status(400).send(response)
         }
 
         //checking password entered is same or not
-        
-        const validPassword= await bcrypt.compare(password,user.password)
-        console.log('valid password',validPassword)
+        const validPassword = await bcrypt.compare(password, user.password)
 
-        if(!validPassword)
-        {
-            console.log('!valid')
+        if (!validPassword) {
+
+            //password is wrong
+
             const response = { "Status": "Failure", "Reason": "Invalid Password" }
-            return res.status(400).send(response) 
+            return res.status(400).send(response)
         }
-        
-        console.log('Successful login')
-        const userId=user.id;
+
+        const userId = user.id;
         //jwt initialization
         const token = jwt.sign(
-            {userName, userId},
+            { userName, userId },
             process.env.JWT_SECRET,
             {
-              expiresIn: '25 days',
+                expiresIn: '25 days',
             }
-          );
-        
-          res.cookie('token', token, {
+        );
+
+        res.cookie('token', token, {
             httpOnly: true,
             maxAge: 2160000000,
             secure: process.env.ENV == 'production' ? true : false,
-          });
+        });
 
 
-        return res.status(200).send('Successful')
-       
-        }catch (error) {
-             console.log('ERROR',error)
+        return res.status(200).send('Successfully logged in')
+
+    } catch (error) {
+        console.log('ERROR', error)
     }
 }
 
 
-export const logout =  (req, res) => {
-   
+export const logout = (req, res) => {
+
     res.clearCookie('token');
-    
+
     return res.send({ "Status": "Success", "Details": "Logout successful" });
 };

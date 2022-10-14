@@ -1,93 +1,50 @@
 import News from "../models/News.js";
 import ReadHistory from "../models/ReadHistory.js";
 
-
-
 export const populateNews = async (req, res) => {
     const userId = req.user.userId;
-
-    console.log('reached populateNews')
     try {
-
         const newsList = await News.find({})
 
-        // console.log("newslist pop",newsList)
-        
-        const readHist = await ReadHistory.find({userId: userId})
-        // console.log("read",readHist)
+        //checking whether news are available
+        if (newsList) {
 
-        const unreadList = newsList.filter(news => {
-            // console.log('news first',news)
-            // console.log("news",news._id)
-            
-            return !readHist.find(function(readNews){
-                // console.log('readNews functio',readNews)
-                return news.id === readNews.newsId
-            })
-        })
-        // console.log("Unread list",unreadList.sort((a,b)=>b.publishedDate-a.publishedDate))
+            //checking whether user has read any news
+            const readHist = await ReadHistory.find({ userId: userId })
 
-        // const readList = await News.aggregate([{
-        //     $lookup: {
-        //         from: 'ReadHistory', // collection to join
-        //         localField: "_id",//field from the input documents
-        //         foreignField: "newsId",//field from the documents of the "from" collection
-        //         as: "details"// output array field
-        //     }}],
-        //     )
+            if (readHist) {
+                //filtering out the unread news
+                const unreadList = newsList.filter(news => {
+                    return !readHist.find(function (readNews) {
+                        return news.id === readNews.newsId
+                    })
+                })
 
-        // if(readList)
-        //     console.log('aggregated read List sorted',readList)
-        // else
-        //     console.log(err,'err not loist')
+                const readHistoryArray = []
+                readHist.map(news =>
+                    readHistoryArray.push(news.newsId))
 
-        // console.log('readhist newsid',readHist[0].newsId)
+                //fetching the read news
+                const readList = await News.find({
+                    _id: {
+                        "$in":
+                            readHistoryArray
+                    }
+                })
 
-        const readHistoryArray = []
-        readHist.map(news=>
-            readHistoryArray.push(news.newsId)) 
-
-            console.log('array',readHistoryArray)
-
-            const readData = await News.find({
-                _id: { "$in": [
-                    readHistoryArray
-                ]}
-            })
-
-            if(readData)
-            console.log('readData',readData)
-            // else
-            // console.log('noread list')
-
-
-        const id = "6347fa2777332c467e9a631a"
-        console.log("lates",latestList)
-        // console.log("NEWS",readhist)
-        // .sort('-publishedDate')
-        if (news) {
-            console.log("read",news[0].readAt)
-            //News is available
-            // let readNews = []
-            for (let i = 0; i < 3; i++) {
-                var nid = data[i].id
-                console.log('nid', nid)
-                var read = ReadHistory.find({ userId: userId, newsId: nid })
-                if (read === undefined) {
-                    readMess = data[i]
+                if (readList) {
+                    readList.sort((a, b) => b.publishedDate - a.publishedDate)
                 }
-                else
-                    unreadMess = unreadMess.push(data[i])
+
+                unreadList.sort((a, b) => b.publishedDate - a.publishedDate)
+                return res.status(200).json({ 'Unread': unreadList, 'Read': readList });
             }
 
+            else {
+                newsList.sort((a, b) => b.publishedDate - a.publishedDate)
+                return res.status(200).json({ 'Unread': newsList });
+            }
 
-
-
-            console.log('read in populate', read._conditions)
-            console.log('unread', unreadMess)
-            console.log('read message', readMess)
-
-            return res.status(200).json(data);
         }
         else {
             const response = { "Status": "Failure", "Reason": "No news found" }
@@ -95,38 +52,27 @@ export const populateNews = async (req, res) => {
 
         }
 
-
     } catch (err) {
-
+        console.log(err)
     }
 }
 
 
-
 export const readNews = async (req, res) => {
 
-    console.log('reached read News')
-
     try {
-
-        console.log("user ID", req.user.userId)
-        console.log('params', req.query.id)
-
         const userId = req.user.userId;
         const newsId = req.query.id;
         const readDate = new Date()
         try {
+            //checking whether news are available
             const news = await News.findOne({ _id: newsId })
-            console.log('news', news)
             if (news === undefined) {
-
                 const response = { "Status": "Failure", "Reason": "No news found" }
                 return res.status(400).send(response)
             }
-
             const read = new ReadHistory({ userId: userId, newsId: newsId, readAt: readDate });
             read.save();
-            console.log('Read successfully')
             return res.status(200).send('Successfully read news')
 
         }

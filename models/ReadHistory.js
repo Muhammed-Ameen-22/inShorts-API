@@ -1,25 +1,20 @@
 import mongoose from "mongoose";
-const Schema=mongoose.Schema;
+const Schema = mongoose.Schema;
 
-const readHistorySchema= new Schema({
+const readHistorySchema = new Schema({
 
-    userId:{
+    userId: {
         type: String,
         min: 3,
         max: 20,
-      },
-    //   newsId:{
-    //     type: Schema.Types.ObjectId,
-    //     ref: "News"
-    
-    //   },
-    newsId:{
+    },
+    newsId: {
         type: String
-      },
-      readAt:{
+    },
+    readAt: {
         type: Date,
-    
-      }
+
+    }
 });
 
 export default mongoose.model('ReadHistory', readHistorySchema);

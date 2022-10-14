@@ -1,39 +1,39 @@
 import mongoose from "mongoose";
-const Schema=mongoose.Schema;
+const Schema = mongoose.Schema;
 
-const NewsSchema= new Schema({
-    
-    image:{
+const NewsSchema = new Schema({
+
+    image: {
         type: String,
         min: 3,
         max: 40,
-      },
-      title:{
+    },
+    title: {
         type: String,
         min: 6,
         max: 20,
-    
-      },
-      subTitle:{
+
+    },
+    subTitle: {
         type: String,
         min: 6,
         max: 50,
-    
-      },
-      authorName:{
+
+    },
+    authorName: {
         type: String,
         min: 6,
         max: 20,
-    
-      },
-      publishedDate:{
+
+    },
+    publishedDate: {
         type: Date,
-    
-      },
-      description :{
+
+    },
+    description: {
         type: String,
-    
-      }
+
+    }
 });
 
 export default mongoose.model('News', NewsSchema);
