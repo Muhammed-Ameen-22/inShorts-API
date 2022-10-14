@@ -25,21 +25,40 @@ export const populateNews = async (req, res) => {
                 return news.id === readNews.newsId
             })
         })
-        console.log("Unread list",unreadList.sort((a,b)=>b.publishedDate-a.publishedDate))
+        // console.log("Unread list",unreadList.sort((a,b)=>b.publishedDate-a.publishedDate))
 
-        const readList = await ReadHistory.aggregate([{
-            $lookup: {
-                from: "News", // collection to join
-                localField: "newsId",//field from the input documents
-                foreignField: "_id",//field from the documents of the "from" collection
-                as: "details"// output array field
-            }
-        },],)
+        // const readList = await News.aggregate([{
+        //     $lookup: {
+        //         from: 'ReadHistory', // collection to join
+        //         localField: "_id",//field from the input documents
+        //         foreignField: "newsId",//field from the documents of the "from" collection
+        //         as: "details"// output array field
+        //     }}],
+        //     )
 
-        if(readList)
-            console.log('aggregate read List sorted',readList)
-        else
-            console.log(err,'err')
+        // if(readList)
+        //     console.log('aggregated read List sorted',readList)
+        // else
+        //     console.log(err,'err not loist')
+
+        // console.log('readhist newsid',readHist[0].newsId)
+
+        const readHistoryArray = []
+        readHist.map(news=>
+            readHistoryArray.push(news.newsId)) 
+
+            console.log('array',readHistoryArray)
+
+            const readData = await News.find({
+                _id: { "$in": [
+                    readHistoryArray
+                ]}
+            })
+
+            if(readData)
+            console.log('readData',readData)
+            // else
+            // console.log('noread list')
 
 
         const id = "6347fa2777332c467e9a631a"
